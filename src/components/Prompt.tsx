@@ -1,20 +1,19 @@
-import {useState} from "react"
+import {useState} from 'react'
 import type { Track } from "../types";
 
 interface PromptProps{
     setPlaylist: (playlist: Track[]) => void // a function that accepts a playlist. a list comprised of tracks
+    setIsGenerating: (isGenerating: boolean) => void // a function that accepts a isLoading bool, and changes the value
 }
 
-const Prompt = ({setPlaylist}: PromptProps) => {
-    const [isGenerating, setIsGenerating] = useState(false);
+const Prompt = ({setPlaylist, setIsGenerating}: PromptProps) => {
     const [prompt, setPrompt] = useState("");
-    // const [playlist, setPlaylist] = useState([]);
+    const [localIsGenerating, setLocalIsGenerating] = useState(false)
 
     const handleSubmit = async () => {
-        //if (e) e.preventDefault()
-        // console.log(`${prompt}`)
-        // console.log(`${isGenerating}`)
-        if (!prompt || isGenerating) return;
+        
+        if (!prompt || localIsGenerating) return;
+        setLocalIsGenerating(true);
         setIsGenerating(true);
 
         const sessionID = sessionStorage.getItem("sessionID");
@@ -54,6 +53,7 @@ const Prompt = ({setPlaylist}: PromptProps) => {
             console.error("Failed to generate a playlist: ", error);
             alert("Something went wrong generating the playlist.");
         } finally {
+            setLocalIsGenerating(false);
             setIsGenerating(false);
         }
 

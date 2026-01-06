@@ -1,15 +1,21 @@
-import type { PlaylistProp } from "../types"
+import type { Track } from "../types"
 
-const Playlist = ({ playlist }: PlaylistProp) => {
+interface PlaylistProp{
+    playlist: Track[]
+}
+
+const Playlist = (prop: PlaylistProp) => {
 
     return (
+
+
         <div className="flex flex-col justify-center items-center border-3">
             <h1 className="">
                 Generated Playlist
             </h1>
 
             <div role="playlist-container" className="flex flex-col gap-3">
-                {playlist.map((track, index) => (
+                {prop.playlist.map((track, index) => (
                     <div
                         key={track.uri || index}
                         className="flex items-center bg-white border border-gray-200 rounded-lg p-3 shadow-sm"
