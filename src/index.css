@@ -1,5 +1,5 @@
 @import "tailwindcss";
 
 :root {
-  
+  --outer-margin: 20
 }

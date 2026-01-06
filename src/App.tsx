@@ -1,6 +1,13 @@
 import Prompt from "./components/Prompt"
+import Playlist from "./components/Playlist"
+import type {Track} from "./types"
+import {useState} from 'react'
 
 function App() {
+  const [playlistData, setPlaylistData] = useState<Track[]>([])
+
+  const sessionID = crypto.randomUUID();
+  sessionStorage.setItem("sessionID", sessionID);
 
   return (
     <>
@@ -9,7 +16,8 @@ function App() {
           Gemini DJ
         </h1>
       </header>
-      <Prompt/>
+      <Prompt setPlaylist={setPlaylistData}/>
+      <Playlist playlist={playlistData}/>
     </>
   )
 }

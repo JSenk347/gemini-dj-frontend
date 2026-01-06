@@ -1,15 +1,76 @@
+import {useState} from "react"
+import type { Track } from "../types";
 
+interface PromptProps{
+    setPlaylist: (playlist: Track[]) => void // a function that accepts a playlist. a list comprised of tracks
+}
 
-const Prompt = () => {
+const Prompt = ({setPlaylist}: PromptProps) => {
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [prompt, setPrompt] = useState("");
+    // const [playlist, setPlaylist] = useState([]);
+
+    const handleSubmit = async () => {
+        //if (e) e.preventDefault()
+        // console.log(`${prompt}`)
+        // console.log(`${isGenerating}`)
+        if (!prompt || isGenerating) return;
+        setIsGenerating(true);
+
+        const sessionID = sessionStorage.getItem("sessionID");
+        console.log(`Session id: ${sessionID}`);
+        
+        // insert loading component
+        try{
+            const response = await fetch('https://jsenkcc-gemini-dj-backend.hf.space/chat', {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json" 
+                },
+                body : JSON.stringify({
+                    message: prompt,
+                    session_id: sessionID
+                })
+            });
+
+            if (!response.ok){
+                throw new Error(`Error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log("Data Received: ", data)
+            
+            if (data.playlist){
+                const formattedPlaylist = data.playlist.map((item: any[]) => ({
+                    title: item[0],
+                    artist: item[1],
+                    uri: item[2],
+                    img_url: item[3]
+                }))
+                setPlaylist(formattedPlaylist);
+            }
+
+        } catch (error) {
+            console.error("Failed to generate a playlist: ", error);
+            alert("Something went wrong generating the playlist.");
+        } finally {
+            setIsGenerating(false);
+        }
+
+    }
 
     return (
-        <div className="flex justify-between gap-7 flex-col items-center border-3 mx-20 py-8">
+        <div className="flex justify-between gap-7 flex-col items-center border-3 mx-20 py-8 mb-10">
             <h1 className="p-0">
                 Prompt
             </h1>
-            <textarea className="w-[70%] min-h-50  px-4 border-3" placeholder="Describe the playlist you want to hear right now..."/>
-            <button className="border-3 p-2 min-w-[50%] flex justify-center gap-5 vertical-align">
-                
+            <textarea 
+                className="w-[70%] min-h-50 py-4 px-4 border-3 resize-none" 
+                placeholder="Describe the playlist you want to hear right now..."
+                onChange={e => setPrompt(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && handleSubmit()}
+            />
+            <button className="border-3 p-2 min-w-[50%] flex justify-center gap-5 vertical-align cursor-pointer" onClick={handleSubmit}>
                  Curate Playlist
             </button>
         </div>
