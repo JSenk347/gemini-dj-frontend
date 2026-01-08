@@ -9,16 +9,16 @@ const Playlist = (prop: PlaylistProp) => {
     return (
 
 
-        <div className="flex flex-col justify-center items-center border-3">
-            <h1 className="">
+        <div className="flex flex-col justify-center items-center  mx-20 border-gray-200 bg-[#fffed] rounded-lg p-3 shadow-lg">
+            <h1 className="my-7 font-semibold text-3xl">
                 Generated Playlist
             </h1>
 
-            <div role="playlist-container" className="flex flex-col gap-3">
+            <div role="playlist-container" className="grid grid-rows-10 grid-flow-col mb-10">
                 {prop.playlist.map((track, index) => (
                     <div
                         key={track.uri || index}
-                        className="flex items-center bg-white border border-gray-200 rounded-lg p-3 shadow-sm"
+                        className="flex items-center flex-wrap justify-center bg-white border border-gray-200 rounded-lg p-3 shadow-sm"
                     >
                         {track.img_url && (
                             <img

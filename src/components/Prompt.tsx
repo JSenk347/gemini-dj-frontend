@@ -60,18 +60,18 @@ const Prompt = ({setPlaylist, setIsGenerating}: PromptProps) => {
     }
 
     return (
-        <div className="flex justify-between gap-7 flex-col items-center border-3 mx-20 py-8 mb-10">
-            <h1 className="p-0">
+        <div className="flex justify-between gap-7 flex-col items-center border-gray-200 bg-[#fffed] rounded-lg p-3 shadow-lg mx-20 py-8 mb-10">
+            <h1 className="font-semibold text-3xl">
                 Prompt
             </h1>
             <textarea 
-                className="w-[70%] min-h-50 py-4 px-4 border-3 resize-none" 
+                className="w-[70%] min-h-50 py-4 px-4 border-gray-500 border-2 rounded-lg resize-none" 
                 placeholder="Describe the playlist you want to hear right now..."
                 onChange={e => setPrompt(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && handleSubmit()}
             />
-            <button className="border-3 p-2 min-w-[50%] flex justify-center gap-5 vertical-align cursor-pointer" onClick={handleSubmit}>
-                 Curate Playlist
+            <button className="border-gray-500 border-2 rounded-lg p-2 min-w-[50%] flex justify-center gap-5 vertical-align cursor-pointer" onClick={handleSubmit}>
+                Generate Playlist
             </button>
         </div>
     );
