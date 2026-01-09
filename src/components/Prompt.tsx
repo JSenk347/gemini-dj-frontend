@@ -10,8 +10,8 @@ const Prompt = ({setPlaylist, setIsGenerating}: PromptProps) => {
     const [prompt, setPrompt] = useState("");
     const [localIsGenerating, setLocalIsGenerating] = useState(false)
 
+    // makes API request to backend/chat endpoint
     const handleSubmit = async () => {
-        
         if (!prompt || localIsGenerating) return;
         setLocalIsGenerating(true);
         setIsGenerating(true);

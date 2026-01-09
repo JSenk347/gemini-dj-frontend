@@ -2,12 +2,13 @@ import Prompt from "./components/Prompt"
 import Playlist from "./components/Playlist"
 import LoadingAnimation from "./components/LoadingAnimation"
 import type { Track } from "./types"
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 function App() {
   const [playlistData, setPlaylistData] = useState<Track[]>([])
   const [isGenerating, setIsGenerating] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false); // use to change "Spotify Login" -> "<username>" and placeholder photo to user photo
+  const hasFetchedToken = useRef(false); // tracks if we've already fired off token request
 
   // only get sessionID if none exists already
   useEffect(() => {
@@ -17,28 +18,35 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const queryParams = new URLSearchParams(window.location.search);
-    const code = queryParams.get("code"); // code sent back from login url which will be exchanged for a token
+    if (!isLoggedIn){
+      const queryParams = new URLSearchParams(window.location.search);
+      const code = queryParams.get("code"); // code sent back from login url which will be exchanged for a token
 
-    if (code) exchangeCodeForToken(code);
-
-    if (code && sessionStorage.getItem("spotify_access_token")){
-      exchangeCodeForToken(code) // get new token is code and auth token in url
-    } else if (sessionStorage.getItem("spotify_access_token")){
-      setIsLoggedIn(true)
+      if (code && !hasFetchedToken.current) {
+        hasFetchedToken.current = true;
+        exchangeCodeForToken(code);
+        console.log("token exchanged");
+      }
+      if ((code && sessionStorage.getItem("spotify_access_token")) && !hasFetchedToken.current){
+        hasFetchedToken.current = true;
+        exchangeCodeForToken(code) // get new token is code and auth token in url
+        console.log("token exchanged 1");
+      } else if (sessionStorage.getItem("spotify_access_token")){
+        setIsLoggedIn(true)
+      }
     }
-
   }, [])
 
   const exchangeCodeForToken = async (code: string) => {
     try{
-      const response = await fetch("https://huggingface.co/spaces/JSenkCC/gemini-dj-backend/token", {
+      const response = await fetch("https://jsenkcc-gemini-dj-backend.hf.space/token", {
         method: "POST",
         headers: {
           "Content-Type" : "application/json"
         },
         body: JSON.stringify({
-          code: code // the code spotify just sent us
+          code: code, // the code spotify just sent us
+          redirect_uri: "http://127.0.0.1:5173"  
         })
       });
 
@@ -52,30 +60,30 @@ function App() {
         sessionStorage.setItem("spotify_access_token", data.access_token);
         setIsLoggedIn(true);
         console.log("User successfully logged in.")
-
-        window.history.replaceState({}, "/") // cleans up url
       }
     } catch (error) {
       console.error("Failed to exchange token", error);
       alert("Failed to login. Please try again.")
+    } finally {
+      window.history.replaceState({}, document.title, "/"); // cleans up url
     }
   }
 
   const handleLogin = async () => {
     try {
       // ask backend for spotify login url
-      const response = await fetch("https://huggingface.co/spaces/JSenkCC/gemini-dj-backend/auth_url", {
+      const response = await fetch("https://jsenkcc-gemini-dj-backend.hf.space/auth_url", {
         method: "POST", // or GET
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          redirect_uri: "http://localhost:5173/callback"
+          redirect_uri: "http://127.0.0.1:5173"
         })
       });
-
+      console.log("Login URL request made.");
       const data = await response.json();
 
       //redirect user to login url
-      window.location.href = data.url;
+      window.location.href = data.auth_url;
 
     } catch (error) {
       console.error("Login Error:", error);
@@ -90,7 +98,7 @@ function App() {
         </h1>
         <div className="absolute right-10 top-1/2 -translate-y-1/2 flex flex-col items-center gap-1 mt-2">
           <img src="/spotify-logo.png" className="w-10"/>
-          <a className="cursor-pointer">
+          <a className="cursor-pointer" onClick={handleLogin}>
             Log In {/*must update dynamically*/}
           </a>
         </div>
