@@ -1,13 +1,14 @@
 import Prompt from "./components/Prompt"
 import Playlist from "./components/Playlist"
 import LoadingAnimation from "./components/LoadingAnimation"
-import type { Track } from "./types"
+import type { Track, User } from "./types"
 import { useState, useEffect, useRef } from 'react'
 
 function App() {
-  const [playlistData, setPlaylistData] = useState<Track[]>([])
+  const [playlistData, setPlaylistData] = useState<Track[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false); // use to change "Spotify Login" -> "<username>" and placeholder photo to user photo
+  const [user, setUser] = useState<User>();
   const hasFetchedToken = useRef(false); // tracks if we've already fired off token request
 
   // only get sessionID if none exists already
@@ -25,12 +26,11 @@ function App() {
       if (code && !hasFetchedToken.current) {
         hasFetchedToken.current = true;
         exchangeCodeForToken(code);
-        console.log("token exchanged");
-      }
-      if ((code && sessionStorage.getItem("spotify_access_token")) && !hasFetchedToken.current){
+        getUserData()
+      } else if ((code && sessionStorage.getItem("spotify_access_token")) && !hasFetchedToken.current){
         hasFetchedToken.current = true;
         exchangeCodeForToken(code) // get new token is code and auth token in url
-        console.log("token exchanged 1");
+        getUserData()
       } else if (sessionStorage.getItem("spotify_access_token")){
         setIsLoggedIn(true)
       }
@@ -69,6 +69,31 @@ function App() {
     }
   }
 
+  const getUserData = async () => {
+    try{
+      const response = await fetch("https://jsenkcc-gemini-dj-backend.hf.space/user_data",{
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          "auth_token": sessionStorage.getItem("spotify_access_token")
+        })
+      });
+
+      const data = await response.json();
+      sessionStorage.setItem("user_spotify_id", data.id);
+
+      setUser({
+        display_img: data.display_img,
+        display_name: data.display_name,
+        profile_uri: data.uri
+      })
+
+    } catch (Error) {
+      console.error("Failed to get user data.");
+      alert("Failed to get user data")
+    }
+  }
+
   const handleLogin = async () => {
     try {
       // ask backend for spotify login url
@@ -97,9 +122,12 @@ function App() {
           Gemini DJ
         </h1>
         <div className="absolute right-10 top-1/2 -translate-y-1/2 flex flex-col items-center gap-1 mt-2">
-          <img src="/spotify-logo.png" className="w-10"/>
-          <a className="cursor-pointer" onClick={handleLogin}>
-            Log In {/*must update dynamically*/}
+          <img src={isLoggedIn && user?.display_img != undefined ? user?.display_img : "/spotify-logo.png"} className="w-15 rounded-full"/>
+          <a className={` ${isLoggedIn? "cursor-pointer": "pointer-events-none"}`} onClick={handleLogin}>
+            {isLoggedIn && user?.display_name != undefined?
+              user?.display_name:
+              "Log In"
+            }
           </a>
         </div>
       </header>

@@ -8,3 +8,9 @@ export interface Track{
 export interface PlaylistProp{
     playlist: Track[]
 }
+
+export interface User{
+    display_name?: string,
+    display_img?: string,
+    profile_uri?: string
+}

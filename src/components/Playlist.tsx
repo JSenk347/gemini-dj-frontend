@@ -6,10 +6,12 @@ interface PlaylistProp{
 
 const Playlist = (prop: PlaylistProp) => {
 
+    const savePlaylist = async () => {
+        
+    }
+
     return (
-
-
-        <div className="flex flex-col justify-center items-center  mx-20 border-gray-200 bg-[#fffed] rounded-lg p-3 shadow-lg">
+        <div className="flex flex-col justify-center items-center mb-10 mx-20 border-gray-200 bg-[#fffed] rounded-lg p-3 shadow-lg">
             <h1 className="my-7 font-semibold text-3xl">
                 Generated Playlist
             </h1>
@@ -38,6 +40,10 @@ const Playlist = (prop: PlaylistProp) => {
                     </div>
                 ))}
             </div>
+            <button role="save-playlist" className="rounded-lg border-gray-200 border-2 px-5 py-2 mb-7 cursor-pointer">
+                Save to Spotify
+            </button>
+
         </div>
     )
 }
